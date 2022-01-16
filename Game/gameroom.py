@@ -1,6 +1,6 @@
-from game import Game
+from Game.game import Game
 from threading import Thread
-from Util.colors import bcolors as bc
+from Game.Util.colors import bcolors as bc
 import os
 import time
 import socket
