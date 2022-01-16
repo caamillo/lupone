@@ -1,11 +1,11 @@
+from Game.Util.player import Player
+from Game.room import Room
+from Game.Util.colors import bcolors as bc
 import os
 import socket
 import threading
 import random
 import ansicon
-from player import Player
-from room import Room
-from colors import bcolors as bc
 
 class Server:
     def __init__(self,host=socket.gethostbyname(socket.gethostname()),port=9090):
