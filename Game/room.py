@@ -1,4 +1,5 @@
 from gameroom import GameRoom
+
 class Room:
     def __init__(self,id,name,game=False,server=None,max=-1): #boolean gameroom = true
         self.id=id
