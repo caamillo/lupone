@@ -1,5 +1,6 @@
+from Util.ruoli import Ruoli
 import random as rnd
-from ruoli import Ruoli
+
 class Game:
     def __init__(self,gameroom):
         self.ruoli=Ruoli()
