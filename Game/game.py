@@ -1,4 +1,4 @@
-from Util.ruoli import Ruoli
+from Game.Util.ruoli import Ruoli
 import random as rnd
 
 class Game:
