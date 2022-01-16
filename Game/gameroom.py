@@ -1,9 +1,10 @@
+from game import Game
+from threading import Thread
+from Util.colors import bcolors as bc
 import os
 import time
 import socket
-from game import Game
-from threading import Thread
-from colors import bcolors as bc
+
 class GameRoom():
     def __init__(self,room,min=1,max=2):
         self.room = room
