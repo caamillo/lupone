@@ -1,9 +1,9 @@
+from Game.Util.colors import bcolors as bc
 import os
 import socket
 import threading
 import ansicon
 import time
-from colors import bcolors as bc
 
 class Client:
     def __init__(self):
