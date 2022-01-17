@@ -71,18 +71,15 @@ class Client:
     def reconnectAnim(self):
         while True:
             while not self.connected:
-                os.system("cls")
-                print(bc().wColors['fail']+'Disconnesso, provando a riconnettermi'+bc().reset)
-                time.sleep(1)
-                os.system("cls")
-                print(bc().wColors['fail']+'Disconnesso, provando a riconnettermi.'+bc().reset)
-                time.sleep(1)
-                os.system("cls")
-                print(bc().wColors['fail']+'Disconnesso, provando a riconnettermi..'+bc().reset)
-                time.sleep(1)
-                os.system("cls")
-                print(bc().wColors['fail']+'Disconnesso, provando a riconnettermi...'+bc().reset)
-                time.sleep(1)
+                dots=''
+                for i in range(4):
+                    if not self.connected: # VEDERE QUI
+                        os.system("cls")
+                        print(bc().wColors['fail']+('Disconnesso, provando a riconnettermi'+dots)+bc().reset)
+                        time.sleep(1)
+                        dots+='.'
+                    else:
+                        break
 
 
 if __name__ == "__main__":

@@ -127,12 +127,13 @@ class Server:
                                 i.client.send(self.getStatus('{} è entrato in stanza!'.format(self.getPlayerByClient(c).username),'success').encode())
                     else:
                         self.pCOC(self.getStatus('Errore: stanza inesistente oppure sei già in una stanza!','fail'),c,console)
-                elif com == 'leave' and self.limComm(args,1,c,console):
-                    if(self.leaveRoom(int(self.getPlayerByClient(c).id),int(args[0]))):
+                elif com == 'leave':
+                    room=self.getPlayerByClient(c).room
+                    if(self.leaveRoom(int(self.getPlayerByClient(c).id))):
                         if self.watchCommands:
-                            print(self.getStatus('{} è uscito da [{}#{}]'.format(self.getPlayerByClient(c).username,self.rooms[int(args[0])].name,self.rooms[int(args[0])].id),'fail'))
-                        self.pCOC(self.getStatus('Sei uscito da [{}#{}]'.format(self.rooms[int(args[0])].name,self.rooms[int(args[0])].id),'success'),c,console)
-                        for i in self.rooms[int(args[0])].players:
+                            print(self.getStatus('{} è uscito da [{}#{}]'.format(self.getPlayerByClient(c).username,room.name,room.id),'fail'))
+                        self.pCOC(self.getStatus('Sei uscito da [{}#{}]'.format(room.name,room.id),'success'),c,console)
+                        for i in self.rooms[room.id].players:
                             if i.id!=self.getPlayerByClient(c).id:
                                 i.client.send(self.getStatus('{} è uscito dalla stanza!'.format(self.getPlayerByClient(c).username),'fail').encode())
                     else:
@@ -200,6 +201,9 @@ class Server:
 
     def joinRoom(self,pid,rid):
         if not self.players[pid].isPlaying and ((self.rooms[rid].maxPlayers>=len(self.rooms[rid].players)) or self.rooms[rid].maxPlayers<0):
+            if(self.rooms[rid].game):
+                if(self.rooms[rid].gameroom.gameStarted):
+                    return False
             v=self.rooms[rid].addPlayer(self.players[pid])
             if v:
                 self.players[pid].isPlaying=True
@@ -207,13 +211,12 @@ class Server:
                 return True
         return False
 
-    def leaveRoom(self,pid,rid):
+    def leaveRoom(self,pid):
         if self.players[pid].isPlaying:
-            if self.players[pid].room.id == rid:
-                self.players[pid].isPlaying = False
-                self.players[pid].room = None
-                self.rooms[rid].removePlayer(pid)
-                return True
+            self.rooms[self.players[pid].room.id].removePlayer(pid)
+            self.players[pid].isPlaying = False
+            self.players[pid].room = None
+            return True
         return False
 
     def getStatus(self,text,status):

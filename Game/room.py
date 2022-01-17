@@ -8,6 +8,7 @@ class Room:
         self.maxPlayers=max
         self.game=game
         self.server=server
+        self.gameroom=None
         if self.game:
             if max>=0:
                 self.gameroom=GameRoom(self,max=max)
