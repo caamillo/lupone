@@ -1,3 +1,4 @@
+from ast import arg
 from Game.Util.player import Player
 from Game.room import Room
 from Game.Util.colors import bcolors as bc
@@ -76,7 +77,7 @@ class Server:
                     for i in self.getPlayerByClient(c).room.players:
                         if i.id!=self.getPlayerByClient(c).id:
                             i.client.send(self.getStatus('{} è uscito dalla stanza!'.format(self.getPlayerByClient(c).username),'fail').encode())
-                    self.leaveRoom(self.getPlayerByClient(c).id,self.getPlayerByClient(c).room.id)
+                    self.leaveRoom(self.getPlayerByClient(c).id)
                 c.shutdown(socket.SHUT_RDWR)
                 self.broadcast(self.getStatus('{} se dato'.format(self.removePlayerByClient(c).username),'fail'))
                 break
@@ -126,7 +127,7 @@ class Server:
                             if i.id!=self.getPlayerByClient(c).id:
                                 i.client.send(self.getStatus('{} è entrato in stanza!'.format(self.getPlayerByClient(c).username),'success').encode())
                     else:
-                        self.pCOC(self.getStatus('Errore: stanza inesistente oppure sei già in una stanza!','fail'),c,console)
+                        self.pCOC(self.getStatus('Errore: impossibile unirsi in stanza!','fail'),c,console)
                 elif com == 'leave':
                     room=self.getPlayerByClient(c).room
                     if(self.leaveRoom(int(self.getPlayerByClient(c).id))):
@@ -137,7 +138,7 @@ class Server:
                             if i.id!=self.getPlayerByClient(c).id:
                                 i.client.send(self.getStatus('{} è uscito dalla stanza!'.format(self.getPlayerByClient(c).username),'fail').encode())
                     else:
-                        self.pCOC(self.getStatus('Errore: stanza inesistente oppure non sei in una stanza!','fail'),c,console)
+                        self.pCOC(self.getStatus('Errore: impossibile uscire dalla stanza!','fail'),c,console)
             elif console:
                 if com == 'watchcom' and self.limComm(args,1,c,console):
                     if args[0].lower() == 'true':
@@ -146,11 +147,14 @@ class Server:
                     else:
                         print(self.getStatus('Toggle WatchCom','fail'))
                         self.watchCommands = False
-                if com == 'isgame' and self.limComm(args,1,c,console):
+                elif com == 'isgame' and self.limComm(args,1,c,console):
                     if(len(self.rooms)>int(args[0]) and int(args[0])>=0):
                         print(self.getStatus(self.rooms[int(args)]).isGame(),'warning')
                     else:
                         print(self.getStatus('Room not found','fail'))
+                elif com == 'admin' and self.limComm(args,1,c,console):
+                    if(self.findPlayer(int(args[0]))>=0):
+                        pass #continua
             else:
                 self.pCOC(self.getStatus('Comando inesistente','fail'),c,console)
         else:
@@ -227,6 +231,13 @@ class Server:
         color = self.colors[indColor]
         del self.colors[indColor]
         return color
+
+    def findPlayer(self,ind):
+        for c,i in enumerate(self.players):
+            if i.id == ind:
+                return c
+        else:
+            return -1
 
 
     def getPlayerByClient(self,c):

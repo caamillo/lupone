@@ -6,3 +6,6 @@ class Player:
         self.color=color
         self.isPlaying=False
         self.room=None
+        self.perm=0
+    def setPerm(self,perm):
+        self.perm=perm
