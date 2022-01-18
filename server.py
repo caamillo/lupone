@@ -6,7 +6,7 @@ import socket
 import threading
 import random
 import ansicon
-import json
+import pickle
 
 class Server:
     def __init__(self,host=socket.gethostbyname(socket.gethostname()),port=9090):
@@ -155,8 +155,13 @@ class Server:
                 elif com == 'admin' and self.limComm(args,1,c,console):
                     playerFound=self.findPlayer(int(args[0]))
                     if playerFound>=0:
-                        self.players[playerFound].admin=True
-                    
+                        if not self.players[playerFound].admin:
+                            self.players[playerFound].admin=True
+                            if not self.isAdmin(self.players[playerFound].username):
+                                with open('admins.txt','wb') as f:
+                                    pickle.dump(self.players[playerFound].username,f)
+                        else:
+                            print(self.getStatus('Questo utente è già admin','warning'))
             else:
                 self.pCOC(self.getStatus('Comando inesistente','fail'),c,console)
         else:
@@ -256,10 +261,30 @@ class Server:
                 return p
         return False
 
-    def isInJson(self,n):
-        with open('{}.json'.format(n)) as f:
-            data=json.load(f)
-            # Continua 1
+    def isAdmin(self,nick):
+        with open('admins.txt','rb') as f:
+            if(len(f.read())>0):
+                admins=pickle.load(f)
+                for i in admins:
+                    if i == nick:
+                        return True
+        return False
+
+        """ TO FIX:
+            Exception in thread Thread-4 (inputHandler):
+            Traceback (most recent call last):
+            File "C:\Program Files\Python310\lib\threading.py", line 1009, in _bootstrap_inner
+                self.run()
+            File "C:\Program Files\Python310\lib\threading.py", line 946, in run
+                self._target(*self._args, **self._kwargs)
+            File "C:\Users\Camillo\Documents\GitHub\lupone\server.py", line 94, in inputHandler
+                self.getCommand(input(),None,console=True)
+            File "C:\Users\Camillo\Documents\GitHub\lupone\server.py", line 160, in getCommand
+                if not self.isAdmin(self.players[playerFound].username):
+            File "C:\Users\Camillo\Documents\GitHub\lupone\server.py", line 267, in isAdmin
+                admins=pickle.load(f)
+            EOFError: Ran out of input
+        """
 
 if __name__ == "__main__":
     ansicon.load()
