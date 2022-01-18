@@ -70,10 +70,10 @@ class Client:
     
     def reconnectAnim(self):
         while True:
-            while not self.connected:
+            if self.reconnect:
                 dots=''
                 for i in range(4):
-                    if not self.connected: # VEDERE QUI
+                    if self.reconnect: # VEDERE QUI
                         os.system("cls")
                         print(bc().wColors['fail']+('Disconnesso, provando a riconnettermi'+dots)+bc().reset)
                         time.sleep(1)
