@@ -259,7 +259,7 @@ class Server:
     def isInJson(self,n):
         with open('{}.json'.format(n)) as f:
             data=json.load(f)
-            # Continua
+            # Continua 1
 
 if __name__ == "__main__":
     ansicon.load()
