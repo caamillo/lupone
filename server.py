@@ -1,4 +1,3 @@
-from ast import arg
 from Game.Util.player import Player
 from Game.room import Room
 from Game.Util.colors import bcolors as bc
@@ -7,6 +6,7 @@ import socket
 import threading
 import random
 import ansicon
+import json
 
 class Server:
     def __init__(self,host=socket.gethostbyname(socket.gethostname()),port=9090):
@@ -153,8 +153,10 @@ class Server:
                     else:
                         print(self.getStatus('Room not found','fail'))
                 elif com == 'admin' and self.limComm(args,1,c,console):
-                    if(self.findPlayer(int(args[0]))>=0):
-                        pass #continua
+                    playerFound=self.findPlayer(int(args[0]))
+                    if playerFound>=0:
+                        self.players[playerFound].admin=True
+                    
             else:
                 self.pCOC(self.getStatus('Comando inesistente','fail'),c,console)
         else:
@@ -253,6 +255,11 @@ class Server:
                 self.players.remove(i)
                 return p
         return False
+
+    def isInJson(self,n):
+        with open('{}.json'.format(n)) as f:
+            data=json.load(f)
+            # Continua
 
 if __name__ == "__main__":
     ansicon.load()
