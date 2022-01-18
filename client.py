@@ -73,7 +73,7 @@ class Client:
             if self.reconnect:
                 dots=''
                 for i in range(4):
-                    if self.reconnect: # VEDERE QUI
+                    if self.reconnect:
                         os.system("cls")
                         print(bc().wColors['fail']+('Disconnesso, provando a riconnettermi'+dots)+bc().reset)
                         time.sleep(1)
