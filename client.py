@@ -8,7 +8,7 @@ import time
 class Client:
     def __init__(self):
         self.s = socket.socket(socket.AF_INET,socket.SOCK_STREAM)
-        self.username = input(bc().wColors['okblue']+'Coem ti chiami...... '+bc().reset)
+        self.username = input(bc().wColors['okblue']+'Coem ti chiami...... '+bc().reset) # Check if someone has this nick if it does than change it
         self.connected=False
         self.reconnect=False
         self.createConnection()
@@ -57,6 +57,22 @@ class Client:
                     self.s = socket.socket(socket.AF_INET,socket.SOCK_STREAM)
                     self.s.connect(('192.168.178.25',9090))
                     self.s.send(self.username.encode())
+                    risp=self.s.recv(1024).decode()
+                    while risp.find('Error')>0:
+                        print(risp)
+                        self.username = input(bc().wColors['okblue']+'Coem ti chiami...... '+bc().reset)
+                        self.s.send(self.username.encode())
+                        risp=self.s.recv(1024).decode()
+                    if risp.find('registrato')>0:
+                        print(risp)
+                        pw = input(bc().wColors['okblue']+'Password...... '+bc().reset)
+                        self.s.send(pw.encode())
+                        risp=self.s.recv(1024).decode()
+                        while risp.find('Error')>0:
+                            print(risp)
+                            pw = input(bc().wColors['okblue']+'Riprova........... '+bc().reset)
+                            self.s.send(pw.encode())
+                            risp=self.s.recv(1024).decode()
                     self.connected=True
                     os.system("cls")
                     if self.reconnect:

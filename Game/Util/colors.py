@@ -19,7 +19,35 @@ class bcolors:
         self.reset = '\033[0m'
         self.bold = '\033[1m'
         self.underline = '\033[4m'
+
     def getColors(self):
         return self.sColors
+
     def getWColors(self):
         return self.wColors
+
+    def getStrColorByAnsi(self,ansiColor):
+        for c,i in enumerate(self.sColors):
+            if ansiColor == i:
+                if c == 0:
+                    return 'red'
+                elif c == 1:
+                    return 'yellow'
+                elif c == 2:
+                    return 'green'
+                elif c == 3:
+                    return 'blue'
+                elif c == 4:
+                    return 'magenta'
+                elif c == 5:
+                    return 'cyan'
+        for i in self.wColors:
+            if ansiColor == self.wColors[i]:
+                return i
+        if ansiColor == '\033[0m':
+            return 'reset'
+        elif ansiColor == '\033[1m':
+            return 'bold'
+        elif ansiColor == '\033[4m':
+            return 'underline'
+        return None

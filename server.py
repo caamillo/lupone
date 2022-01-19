@@ -6,6 +6,7 @@ import socket
 import threading
 import random
 import ansicon
+import json
 import pickle
 
 class Server:
@@ -27,8 +28,26 @@ class Server:
         while True:
             c, addr = self.s.accept()
             username = c.recv(1024).decode()
+            IsUsrInServ=True
+            while IsUsrInServ:
+                IsUsrInServ=False
+                for i in self.players:
+                    if i.username == username:
+                        c.send(self.getStatus('Errore: questo utente è già connesso, inserire un altro username','fail').encode())
+                        IsUsrInServ=True
+                if IsUsrInServ:
+                    username = c.recv(1024).decode()
+            player=Player(len(self.players),c,username,self.getRandomColor())
+            fa=self.findAccount(player)
+            if fa>=0:
+                c.send(self.getStatus('Questo account è già registrato, inserire la password per loggare','warning').encode())
+                pw = c.recv(1024).decode()
+                while(pw!=self.getAccount(fa)['password']):
+                    c.send(self.getStatus('Errore: password non corretta.....','fail').encode())
+                    pw = c.recv(1024).decode()
+            c.send(self.getStatus('Connesso con successo','success').encode())
             self.broadcast(self.getStatus('{} se connesos'.format(username),'success'))
-            self.players.append(Player(len(self.players),c,username,self.getRandomColor()))
+            self.players.append(player)
             threading.Thread(target=self.handleClient,args=(c,addr,)).start()
             threading.Thread(target=self.inputHandler,args=()).start()
 
@@ -139,6 +158,11 @@ class Server:
                                 i.client.send(self.getStatus('{} è uscito dalla stanza!'.format(self.getPlayerByClient(c).username),'fail').encode())
                     else:
                         self.pCOC(self.getStatus('Errore: impossibile uscire dalla stanza!','fail'),c,console)
+                elif com == 'setpassword' and self.limComm(args,1,c,console):
+                    if(self.addAccount(self.getPlayerByClient(c),args[0])):
+                        self.pCOC(self.getStatus('Account aggiunto con successo','success'),c,console)
+                    else:
+                        self.pCOC(self.getStatus('Impossibile aggiungere il profilo','fail'),c,console)
             elif console:
                 if com == 'watchcom' and self.limComm(args,1,c,console):
                     if args[0].lower() == 'true':
@@ -158,7 +182,7 @@ class Server:
                         if not self.players[playerFound].admin:
                             self.players[playerFound].admin=True
                             if not self.isAdmin(self.players[playerFound].username):
-                                with open('admins.txt','wb') as f:
+                                with open('admins.pkl','wb') as f:
                                     pickle.dump(self.players[playerFound].username,f)
                         else:
                             print(self.getStatus('Questo utente è già admin','warning'))
@@ -189,6 +213,59 @@ class Server:
         elif(len(args)>lenargs):
             self.pCOC(self.getStatus('Errore: inserire meno argomenti','fail'),c,console)
         return False
+
+    def addAccount(self,p,pw):
+        if self.findAccount(p)<0:
+            for i in self.players:
+                if p.id == i.id:
+                    if os.path.getsize('profiles.json')>0:
+                        with open('profiles.json','r',encoding='utf-8') as f:
+                            data=json.load(f)
+                    else:
+                        data=dict()
+                    with open('profiles.json','w',encoding='utf-8') as f:
+                        pp={
+                            'username':p.username,
+                            'color':bc().getStrColorByAnsi(p.color),
+                            'admin':p.admin,
+                            'password':pw
+                        }
+                        self.players[p.id].setPassword(pw)
+                        data[p.username]=pp
+                        json.dump(data,f)
+                    return True
+        return False
+    
+    def removeAccount(self,p):
+        if os.path.getsize('profiles.json')>0:
+            if self.findAccount(p) > 0:
+                with open('profiles.json','r',encoding='utf-8') as f:
+                    data=json.load(f)
+                with open('profiles.json','w',encoding='utf-8') as f:
+                    for i in data:
+                        if i==p.username:
+                            del data[i]
+                    json.dump(data,f)
+                return True
+        return False
+
+    def getAccount(self,n):
+        if os.path.getsize('profiles.json')>0:
+            with open('profiles.json','r',encoding='utf-8') as f:
+                data=json.load(f)
+            for c,i in enumerate(data):
+                if c == n:
+                    return data[i]
+        return None
+
+    def findAccount(self,p):
+        if os.path.getsize('profiles.json')>0:
+            with open('profiles.json','r',encoding='utf-8') as f:
+                data=json.load(f)
+            for c,i in enumerate(data):
+                if i==p.username:
+                    return c
+        return -1
 
     def createRoom(self,name,type):
         if type.lower() == 'normal':
@@ -262,29 +339,16 @@ class Server:
         return False
 
     def isAdmin(self,nick):
-        with open('admins.txt','rb') as f:
-            if(len(f.read())>0):
-                admins=pickle.load(f)
-                for i in admins:
-                    if i == nick:
-                        return True
+        if os.path.getsize('admins.pkl')>0:
+            with open('admins.pkl','rb') as f:
+                try:
+                    admins=pickle.load(f) # continuare
+                    for i in admins:
+                        if i == nick:
+                            return True
+                except:
+                    return False
         return False
-
-        """ TO FIX:
-            Exception in thread Thread-4 (inputHandler):
-            Traceback (most recent call last):
-            File "C:\Program Files\Python310\lib\threading.py", line 1009, in _bootstrap_inner
-                self.run()
-            File "C:\Program Files\Python310\lib\threading.py", line 946, in run
-                self._target(*self._args, **self._kwargs)
-            File "C:\Users\Camillo\Documents\GitHub\lupone\server.py", line 94, in inputHandler
-                self.getCommand(input(),None,console=True)
-            File "C:\Users\Camillo\Documents\GitHub\lupone\server.py", line 160, in getCommand
-                if not self.isAdmin(self.players[playerFound].username):
-            File "C:\Users\Camillo\Documents\GitHub\lupone\server.py", line 267, in isAdmin
-                admins=pickle.load(f)
-            EOFError: Ran out of input
-        """
 
 if __name__ == "__main__":
     ansicon.load()

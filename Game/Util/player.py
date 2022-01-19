@@ -7,3 +7,6 @@ class Player:
         self.isPlaying=False
         self.room=None
         self.admin=False
+        self.password=None
+    def setPassword(self,pw):
+        self.password=pw
