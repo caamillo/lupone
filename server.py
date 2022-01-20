@@ -8,7 +8,7 @@ import threading
 import random
 import ansicon
 import json
-
+# Day 13
 class Server:
     def __init__(self,host=socket.gethostbyname(socket.gethostname()),port=9090):
         self.s = socket.socket(socket.AF_INET,socket.SOCK_STREAM)
