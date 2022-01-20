@@ -1,11 +1,8 @@
 To Do:
     Game
-    Private Messages
+Doing:
+    Fix Join server issue
+    Private Messages -
     Kick Player
     Ban Player
     Mute Player
-Doing:
-    Fix issue at line 267 in server.py
-    Perms Per Player
-    setPassword function
-    when login username if pw exists than ask for
