@@ -1,4 +1,3 @@
-from ast import arg
 from Game.Util.player import Player
 from Game.room import Room
 from Game.Util.colors import bcolors as bc
