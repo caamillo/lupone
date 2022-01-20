@@ -32,7 +32,7 @@ class GameRoom():
                         self.gameStarted=True
                         self.startGame()
     def cooldown(self,t,text):
-        for i in reversed(range(1,t)):
+        for i in reversed(range(1,t+1)):
             self.s.broadcastRoom('{} {}'.format(text,str(i)),None,self.id,True)
             time.sleep(1)
     def startGame(self):

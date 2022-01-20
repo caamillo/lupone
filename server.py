@@ -40,7 +40,7 @@ class Server:
                         IsUsrInServ=True
                 if IsUsrInServ:
                     username = c.recv(1024).decode()
-            player=Player(len(self.players),c,username,self.getRandomColor())
+            player=Player(len(self.players),c,username)
             fa=self.findAccount(player)
             if fa>=0:
                 try:
@@ -49,13 +49,17 @@ class Server:
                     while(pw!=self.getAccount(fa)['password']):
                         c.send(self.getStatus('Errore: password non corretta.....','fail').encode()) # FIX
                         pw = c.recv(1024).decode()
-                        c.send(self.getStatus('Connesso con successo','success').encode())
-                        self.broadcast(self.getStatus('{} se connesos'.format(username),'success'))
-                        self.players.append(player)
-                        threading.Thread(target=self.handleClient,args=(c,addr,)).start()
+                    color = self.pickColor(bc().getAnsiByStrColor(self.getAccount(fa)['chatColor']))
+                    player.setColor(color)
+                    c.send(self.getStatus('Connesso con successo','success').encode())
+                    self.broadcast(self.getStatus('{} se connesos'.format(username),'success'))
+                    self.players.append(player)
+                    threading.Thread(target=self.handleClient,args=(c,addr,)).start()
                 except:
                     c.close()
             else:
+                color = self.getRandomColor()
+                player.setColor(color)
                 c.send(self.getStatus('Connesso con successo','success').encode())
                 self.broadcast(self.getStatus('{} se connesos'.format(username),'success'))
                 self.players.append(player)
@@ -116,11 +120,15 @@ class Server:
                 elif self.getPlayerByClient(c).isPlaying:
                     self.broadcastRoom(msg,c,self.getPlayerByClient(c).room.id)
             elif(str(msg.decode()).strip()[0]=='/'):
-                self.getCommand(msg.decode().strip(),c)
+                comExec=self.getCommand(msg.decode().strip(),c)
+                if comExec == None:
+                    self.pCOC(self.getStatus('Comando inesistente','fail'),c)
     
     def inputHandler(self):
         while True:
-            self.getCommand(input(),None,console=True)
+            comExec=self.getCommand(input(),None,console=True)
+            if comExec == None:
+                print(self.getStatus('Comando inesistente','fail'))
 
     def getCommand(self,msg,c,console=False):
         if len(msg) > 1:
@@ -130,38 +138,47 @@ class Server:
             else:
                 com = msg[1:].lower()
             #print(com)
-            if com == 'createroom' and self.limComm(args,1,c,console):
-                room = None
-                if self.isAdmin(self.getPlayerByClient(c)):
-                    if len(args)>1:
-                        room = self.createRoom(args[0],args[1])
-                    else:
-                        room = self.createRoom(args[0],'default')
-                if room != None:
-                    if self.watchCommands:
-                        print(self.getStatus('{} ha creato la stanza [{}#{}]'.format(self.getPlayerByClient(c).username,room.name,room.id),'success'))
-                    self.pCOC(self.getStatus('Stanza [{}#{}] creata con succesos'.format(room.name,room.id),'success'),c,console)
-                    return True
-                self.pCOC(self.getStatus('Impossibile creare la stanza','fail'),c,console)
-                return False
-            elif com == 'removeroom' and self.limComm(args,1,c,console):
-                room = None
-                if self.isAdmin(self.getPlayerByClient(c)):
-                    room = self.removeRoom(args[0])
-                if(room!=None):
-                    if self.watchCommands:
-                        print(self.getStatus('{} ha rimosso la stanza [{}#{}]'.format(self.getPlayerByClient(c).username,room.name,room.id),'success'))
-                    self.pCOC(self.getStatus('Stanza [{}#{}] rimossa con succesos'.format(room.name,room.id),'success'),c,console)
-                    return True
-                self.pCOC(self.getStatus('Impossibile rimuovere la stanza','fail'),c,console)
-                return False
-            elif com == 'listrooms':
+            if com == 'listrooms': # vedere se funziona
                 self.pCOC(self.getStatus('Stanze Aperte:','okblue'),c,console)
                 for i in self.rooms:
                     self.pCOC(self.getStatus('Stanza [{}#{}]\n'.format(i.name,i.id),'okblue'),c,console)
                 return True
             elif com == 'cls':
                 self.pCOC('/cls',c,console)
+            if self.isAdmin(self.getPlayerByClient(c)):
+                if com == 'createroom' and self.limComm(args,1,c,console,unlimited=True):
+                    room = None
+                    if len(args)>1:
+                        room = self.createRoom(args[0],args[1])
+                    else:
+                        room = self.createRoom(args[0],'default')
+                    if room != None:
+                        if self.watchCommands:
+                            print(self.getStatus('{} ha creato la stanza [{}#{}]'.format(self.getPlayerByClient(c).username,room.name,room.id),'success'))
+                        self.pCOC(self.getStatus('Stanza [{}#{}] creata con succesos'.format(room.name,room.id),'success'),c,console)
+                        return True
+                    self.pCOC(self.getStatus('Impossibile creare la stanza','fail'),c,console)
+                    return False
+                elif com == 'removeroom' and self.limComm(args,1,c,console):
+                    room = None
+                    room = self.removeRoom(args[0])
+                    if(room!=None):
+                        if self.watchCommands:
+                            print(self.getStatus('{} ha rimosso la stanza [{}#{}]'.format(self.getPlayerByClient(c).username,room.name,room.id),'success'))
+                        self.pCOC(self.getStatus('Stanza [{}#{}] rimossa con succesos'.format(room.name,room.id),'success'),c,console)
+                        return True
+                    self.pCOC(self.getStatus('Impossibile rimuovere la stanza','fail'),c,console)
+                    return False
+                elif com == 'kick' and self.limComm(args,1,c,console):
+                    playerFound = self.players[self.findPlayer(args[0])]
+                    if playerFound != None: # Fix
+                        if self.kickPlayer(playerFound):
+                            self.pCOC(self.getStatus('{} kickato'.format(playerFound.username),'fail'),c,console)
+                        else:
+                            self.pCOC(self.getStatus('Impossibile kickare il player','fail'),c,console)
+                    else:
+                        self.pCOC(self.getStatus('Player non trovato','fail'),c,console)
+                    return False
             elif not console:
                 if com == 'join' and self.limComm(args,1,c,console):
                     if(self.joinRoom(int(self.getPlayerByClient(c).id),int(args[0]))):
@@ -171,9 +188,10 @@ class Server:
                         for i in self.rooms[int(args[0])].players:
                             if i.id!=self.getPlayerByClient(c).id:
                                 i.client.send(self.getStatus('{} è entrato in stanza!'.format(self.getPlayerByClient(c).username),'success').encode())
+                        return True
                     else:
                         self.pCOC(self.getStatus('Errore: impossibile unirsi in stanza!','fail'),c,console)
-                        return False
+                    return False
                 elif com == 'leave':
                     room=self.getPlayerByClient(c).room
                     if(self.leaveRoom(int(self.getPlayerByClient(c).id))):
@@ -183,33 +201,41 @@ class Server:
                         for i in self.rooms[room.id].players:
                             if i.id!=self.getPlayerByClient(c).id:
                                 i.client.send(self.getStatus('{} è uscito dalla stanza!'.format(self.getPlayerByClient(c).username),'fail').encode())
+                        return True
                     else:
                         self.pCOC(self.getStatus('Errore: impossibile uscire dalla stanza!','fail'),c,console)
+                    return False
                 elif com == 'setpassword' and self.limComm(args,1,c,console):
                     if(self.addAccount(self.getPlayerByClient(c),args[0])):
                         self.pCOC(self.getStatus('Account aggiunto con successo','success'),c,console)
+                        return True
                     else:
                         self.pCOC(self.getStatus('Impossibile aggiungere il profilo','fail'),c,console)
+                    return False
                 elif com == 'changepassword' and self.limComm(args,1,c,console):
                     if os.path.getsize('profiles.json')>0:
                         if(self.changePassword(self.getPlayerByClient(c),args[0])):
                             self.pCOC(self.getStatus('Password cambiata con successo','success'),c,console)
+                            return True
                         else:
                             self.pCOC(self.getStatus('Account non trovato','fail'),c,console)
                     else:
                         self.pCOC(self.getStatus('Account non trovato','fail'),c,console)
-                elif com == 'privmsg' and self.limComm(args,2,c,console):
+                    return False
+                elif com in ['privmsg','privatemsg','privatemessage'] and self.limComm(args,2,c,console):
                     playerFound=self.getPlayerByUsername(args[0])
                     if playerFound!=None:
                         if len(args[1].strip())>0:
-                            if(self.privateMessage(self.getPlayerByClient(c),playerFound)):
+                            if(self.privateMessage(self.getPlayerByClient(c),playerFound,args[1].strip())):
                                 self.pCOC(self.getStatus('Messaggio inviato con successo','success'),c,console)
+                                return True
                             else:
                                 self.pCOC(self.getStatus('Errore: Messaggio non inviato','fail'),c,console)
                         else:
                             self.pCOC(self.getStatus('Impossibile inviare un messaggio vuoto','fail'),c,console)
                     else:
                         self.pCOC(self.getStatus('Player not found','fail'),c,console)
+                    return False
             elif console:
                 if com == 'watchcom' and self.limComm(args,1,c,console):
                     toggle = self.isYesOrNo(args[0])
@@ -219,11 +245,15 @@ class Server:
                             print(self.getStatus('Toggle WatchCom','success'))
                         else:
                             print(self.getStatus('Toggle WatchCom','fail'))
+                        return True
+                    return False
                 elif com == 'isgame' and self.limComm(args,1,c,console):
                     if(len(self.rooms)>int(args[0]) and int(args[0])>=0):
                         print(self.getStatus(self.rooms[int(args)]).isGame(),'warning')
+                        return True
                     else:
                         print(self.getStatus('Room not found','fail'))
+                    return False
                 elif com == 'admin' and self.limComm(args,2,c,console):
                     toggle=self.isYesOrNo(args[1])
                     if toggle != None:
@@ -241,14 +271,13 @@ class Server:
                                 else:
                                     print(self.getStatus('{} non è più admin'.format(self.players[playerFound].username),'fail'))
                                     self.players[playerFound].client.send(self.getStatus('Non hai più i privilegi di amministratore','fail').encode())
+                            return True
                         else:
                             print(self.getStatus('Account non trovato','fail'))
                     else:
                         print(self.getStatus('Inserire True o False','fail'))
-            else:
-                self.pCOC(self.getStatus('Comando inesistente','fail'),c,console)
-        else:
-            self.pCOC(self.getStatus('Comando inesistente','fail'),c,console)
+                    return False
+        return None
 
     def pCOC(self,text,c,console=False):
         if not console:
@@ -276,8 +305,11 @@ class Server:
             return True
         elif(len(args)<lenargs):
             self.pCOC(self.getStatus('Errore: inserire più argomenti','fail'),c,console)
-        elif(len(args)>lenargs and not unlimited):
-            self.pCOC(self.getStatus('Errore: inserire meno argomenti','fail'),c,console)
+        elif(len(args)>lenargs):
+            if unlimited:
+                return True
+            else:
+                self.pCOC(self.getStatus('Errore: inserire meno argomenti','fail'),c,console)
         return False
 
     def addAccount(self,p,pw):
@@ -388,6 +420,21 @@ class Server:
     def getStatus(self,text,status):
         return bc().getWColors()[status]+text+bc().reset
 
+    def kickPlayer(self,p):
+        for i in self.players:
+            if p.id == i.id:
+                i.client.close()
+                return True
+        return False
+
+    def pickColor(self,color):
+        for c,i in enumerate(self.colors):
+            if i == color:
+                ansiColor = self.colors[c]
+                del self.colors[c]
+                return ansiColor
+        return None
+
     def getRandomColor(self):
         indColor = random.randrange(0,len(self.colors))
         color = self.colors[indColor]
@@ -422,14 +469,14 @@ class Server:
                 return i
         return None
 
-    def isAdmin(self,nick):
+    def isAdmin(self,player):
         if os.path.getsize('profiles.json')>0:
             with open('profiles.json','r') as f:
                 try:
                     profiles=json.load(f)
                     for i in profiles:
-                        if i == nick:
-                            return i['isAdmin']
+                        if i == player.username:
+                            return profiles[i]['isAdmin']
                 except:
                     return False
         return False

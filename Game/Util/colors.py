@@ -1,3 +1,6 @@
+from turtle import st
+
+
 class bcolors:
     def __init__(self):
         self.sColors = [
@@ -51,3 +54,27 @@ class bcolors:
         elif ansiColor == '\033[4m':
             return 'underline'
         return None
+    def getAnsiByStrColor(self,strColor):
+        if strColor == 'red':
+            return '\u001b[31m'
+        elif strColor == 'yellow':
+            return '\u001b[32m'
+        elif strColor == 'green':
+            return '\u001b[33m'
+        elif strColor == 'blue':
+            return '\u001b[34m'
+        elif strColor == 'magenta':
+            return '\u001b[35m'
+        elif strColor == 'cyan':
+            return '\u001b[36m'
+        elif strColor == 'reset':
+            return '\033[0m'
+        elif strColor == 'bold':
+            return '\033[1m'
+        elif strColor == 'underline':
+            return '\033[4m'
+        for i in self.wColors:
+            if strColor == i:
+                return self.wColors[i]
+        return None
+        
