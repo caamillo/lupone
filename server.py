@@ -1,4 +1,3 @@
-from ast import arg
 from Game.Util.player import Player
 from Game.room import Room
 from Game.Util.colors import bcolors as bc
@@ -179,7 +178,7 @@ class Server:
                     else:
                         self.pCOC(self.getStatus('Player non trovato','fail'),c,console)
                     return False
-            elif not console:
+            if not console:
                 if com == 'join' and self.limComm(args,1,c,console):
                     if(self.joinRoom(int(self.getPlayerByClient(c).id),int(args[0]))):
                         if self.watchCommands:

@@ -14,12 +14,12 @@
         "name":"Bodyguard",
         "type":"good"
     },
-    "Jailor":{
+    "jailor":{
         "id":3,
         "name":"Jailor",
         "type":"good"
     },
-    "Investigatore":{
+    "investigatore":{
         "id":4,
         "name":"Investigatore",
         "type":"good"

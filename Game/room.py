@@ -9,6 +9,7 @@ class Room:
         self.game=game
         self.server=server
         self.gameroom=None
+        self.banned=[]
         if self.game:
             if max>=0:
                 self.gameroom=GameRoom(self,max=max)
