@@ -1,46 +1,51 @@
 {
-    "mafioso":{
+    "cittadino":{
         "id":0,
-        "name":"Mafioso",
+        "name":"Cittadino",
+        "type":"good"
+    },
+    "lupo":{
+        "id":1,
+        "name":"Lupo",
         "type":"bad"
     },
-    "padrino":{
-        "id":1,
-        "name":"Padrino",
+    "capobranco":{
+        "id":2,
+        "name":"Capobranco",
         "type":"bad"
     },
     "bodyguard":{
-        "id":2,
+        "id":3,
         "name":"Bodyguard",
         "type":"good"
     },
     "jailor":{
-        "id":3,
+        "id":4,
         "name":"Jailor",
         "type":"good"
     },
     "investigatore":{
-        "id":4,
+        "id":5,
         "name":"Investigatore",
         "type":"good"
     },
     "medium":{
-        "id":5,
+        "id":6,
         "name":"Medium",
         "type":"good"
     },
     "jester":{
-        "id":6,
+        "id":7,
         "name":"Jester",
         "type":"neutral"
     },
     "esecutore":{
-        "id":7,
+        "id":8,
         "name":"Esecutore",
         "type":"neutral"
     },
     "sciamano":{
-        "id":8,
+        "id":9,
         "name":"Sciamano",
         "type":"bad"
     }

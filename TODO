@@ -6,3 +6,6 @@ To Do:
     Mute Player
 Doing:
     Game
+    fare che prima di startare la gameroom aspetta 30 secondi, nel caso entri un altro giocatore nel mentre si resetta a 30
+    fix se fai join e un numero di room id che non esiste crasha
+    quando fa leave un giocatore broadcast a tutti che e uscito, creare l'evento onLeave in gameroom

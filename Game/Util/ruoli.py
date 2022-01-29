@@ -20,3 +20,63 @@ class Ruoli:
             for j in self.ruoli[i]:
                 if name.lower() == str(self.ruoli[i][j]).lower():
                     return self.ruoli[i]['id']
+class Cittadini:
+    def __init__(self,player=None):
+        self.player=player
+        self.players=[]
+    def addPlayer(self,player):
+        self.players.append(player)
+    def getJson(self):
+        return {
+            "id":-1,
+            "name":"Cittadino",
+            "type":"good"
+        }
+class Lupi:
+    def __init__(self,player=None):
+        self.player=player
+        self.players=[]
+    def addPlayer(self,player):
+        self.players.append(player)
+    def getJson(self):
+        return Ruoli().getAllRuoli()['lupo']
+class Capobranco:
+    def __init__(self,player=None):
+        self.player=player
+    def getJson(self):
+        return Ruoli().getAllRuoli()['capobranco']
+class Bodyguard:
+    def __init__(self,player=None):
+        self.player=player
+    def getJson(self):
+        return Ruoli().getAllRuoli()['bodyguard']
+class Jailor:
+    def __init__(self,player=None):
+        self.player=player
+    def getJson(self):
+        return Ruoli().getAllRuoli()['jailor']
+class Investigatore:
+    def __init__(self,player=None):
+        self.player=player
+    def getJson(self):
+        return Ruoli().getAllRuoli()['investigatore']
+class Medium:
+    def __init__(self,player=None):
+        self.player=player
+    def getJson(self):
+        return Ruoli().getAllRuoli()['medium']
+class Jester:
+    def __init__(self,player=None):
+        self.player=player
+    def getJson(self):
+        return Ruoli().getAllRuoli()['jester']
+class Esecutore:
+    def __init__(self,player=None):
+        self.player=player
+    def getJson(self):
+        return Ruoli().getAllRuoli()['esecutore']
+class Sciamano:
+    def __init__(self,player=None):
+        self.player=player
+    def getJson(self):
+        return Ruoli().getAllRuoli()['sciamano']

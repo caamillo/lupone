@@ -6,7 +6,7 @@ import time
 import socket
 
 class GameRoom():
-    def __init__(self,room,min=2,max=2):
+    def __init__(self,room,min=6,max=999):
         self.room = room
         self.id=room.id
         self.name=room.name
